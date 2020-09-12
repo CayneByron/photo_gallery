@@ -16,7 +16,6 @@ class FullSizeImage extends StatefulWidget {
 }
 
 class _FullSizeImageState extends State<FullSizeImage> {
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
   Map data = {};
   int desiredHeight;
   int desiredWidth;
@@ -31,10 +30,6 @@ class _FullSizeImageState extends State<FullSizeImage> {
   double scaleCopy;
   PhotoViewScaleStateController scaleStateController;
   bool isShowingUI = false;
-  double currentPercentage = 0.0;
-  int pageCount = 0;
-  int selectedRadio = 0;
-  Timer timer;
 
   @override
   void initState() {
@@ -43,7 +38,6 @@ class _FullSizeImageState extends State<FullSizeImage> {
     scaleStateController = PhotoViewScaleStateController();
     SystemChrome.setEnabledSystemUIOverlays([]);
     isShowingUI = false;
-    pageCount++;
   }
 
   @override
@@ -56,7 +50,6 @@ class _FullSizeImageState extends State<FullSizeImage> {
   }
 
   Future<VideoPlayer> setupVideo() async {
-    print('setupVideo');
     String videoPath =
         await LocalImageProvider().videoFile(localImages[selectedIndex].id);
     print(videoPath);
@@ -113,14 +106,6 @@ class _FullSizeImageState extends State<FullSizeImage> {
 
   @override
   Widget build(BuildContext context) {
-    print('BUILD ');
-    print('pageCount: $pageCount');
-    Timer(Duration(seconds: 3), () {
-      print("Yeah, this line is printed after 3 seconds");
-    });
-
-    setState(() {});
-
     data = data.isNotEmpty ? data : ModalRoute.of(context).settings.arguments;
     localImages = data['localImages'];
     selectedIndex = data['selectedIndex'];
@@ -134,99 +119,92 @@ class _FullSizeImageState extends State<FullSizeImage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Flexible(
-              child: localImages[selectedIndex].isVideo
-                  ? Center(
-                      child: FutureBuilder(
-                          future: setupVideo(),
-                          builder: (BuildContext context,
-                              AsyncSnapshot<VideoPlayer> vp) {
-                            if (vp.hasData) {
-                              videoController.play();
-                              return Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  GestureDetector(
-                                    onHorizontalDragStart: (DragStartDetails details) {
-                                      swipeXStart = details.localPosition.dx;
-                                    },
-                                    onHorizontalDragUpdate: (DragUpdateDetails details) {
-                                      swipeXEnd = details.localPosition.dx;
-                                    },
-                                    onHorizontalDragEnd: (DragEndDetails details) {
-                                      if (!videoController.value.isPlaying) {
-                                        nextSlide();
-                                      }
-                                    },
-                                    onTap: () async {
-                                      if (videoController.value.isPlaying) {
-                                        videoController.pause();
-                                      } else {
-                                        videoController.play();
-                                      }
-                                    },
-                                    child: Center(
-                                      child: AspectRatio(
-                                        aspectRatio:
-                                            videoController.value.aspectRatio,
-                                        child: vp.data,
-                                      ),
-                                    ),
-                                  ),
-                                  ValueListenableBuilder(
-                                    valueListenable: videoController,
-                                    builder: (context, VideoPlayerValue value,
-                                        child) {
-                                      //Do Something with the value.
-                                      return GestureDetector(
-                                        onTapUp: (TapUpDetails details) async {
-                                          double totalWidth = MediaQuery.of(context).size.width;
-                                          double desiredPercent = details.globalPosition.dx / totalWidth;
-                                          int milliseconds = (videoController.value.duration.inMilliseconds * desiredPercent).floor();
-                                          videoController.seekTo(Duration(milliseconds: milliseconds ));
-                                        },
-                                        child: LinearProgressIndicator(
-                                          minHeight: 5.0,
-                                          value: value.position.inMilliseconds /
-                                              value.duration.inMilliseconds,
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ],
+              child: localImages[selectedIndex].isVideo ? Center(
+                child: FutureBuilder(
+                  future: setupVideo(),
+                  builder: (BuildContext context, AsyncSnapshot<VideoPlayer> vp) {
+                    if (vp.hasData) {
+                      videoController.play();
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          GestureDetector(
+                            onHorizontalDragStart: (DragStartDetails details) {
+                              swipeXStart = details.localPosition.dx;
+                            },
+                            onHorizontalDragUpdate: (DragUpdateDetails details) {
+                              swipeXEnd = details.localPosition.dx;
+                            },
+                            onHorizontalDragEnd: (DragEndDetails details) {
+                              if (!videoController.value.isPlaying) {
+                                nextSlide();
+                              }
+                            },
+                            onTap: () async {
+                              if (videoController.value.isPlaying) {
+                                videoController.pause();
+                              } else {
+                                videoController.play();
+                              }
+                            },
+                            child: Center(
+                              child: AspectRatio(
+                                aspectRatio:
+                                    videoController.value.aspectRatio,
+                                child: vp.data,
+                              ),
+                            ),
+                          ),
+                          ValueListenableBuilder(
+                            valueListenable: videoController,
+                            builder: (context, VideoPlayerValue value, child) {
+                              return GestureDetector(
+                                onTapUp: (TapUpDetails details) async {
+                                  double totalWidth = MediaQuery.of(context).size.width;
+                                  double desiredPercent = details.globalPosition.dx / totalWidth;
+                                  int milliseconds = (videoController.value.duration.inMilliseconds * desiredPercent).floor();
+                                  videoController.seekTo(Duration(milliseconds: milliseconds ));
+                                },
+                                child: LinearProgressIndicator(
+                                  minHeight: 5.0,
+                                  value: value.position.inMilliseconds / value.duration.inMilliseconds,
+                                ),
                               );
-                              //return vp.data;  // image is ready
-                            } else {
-                              return new Container(); // placeholder
-                            }
-                          }),
-                    )
-                  : GestureDetector(
-                      onTap: () {
-                        if (isShowingUI) {
-                          isShowingUI = false;
-                          SystemChrome.setEnabledSystemUIOverlays([]);
-                        } else {
-                          isShowingUI = true;
-                          SystemChrome.setEnabledSystemUIOverlays(
-                              SystemUiOverlay.values);
-                        }
-                      },
-                      onHorizontalDragStart: (DragStartDetails details) {
-                        swipeXStart = details.localPosition.dx;
-                      },
-                      onHorizontalDragUpdate: (DragUpdateDetails details) {
-                        swipeXEnd = details.localPosition.dx;
-                      },
-                      onHorizontalDragEnd: (DragEndDetails details) {
-                        nextSlide();
-                      },
-                      child: PhotoView(
-                        imageProvider:
-                            DeviceImage(localImages[selectedIndex], scale: 1),
-                        scaleStateController: scaleStateController,
-                        //controller: photoController,
-                      ),
-                    ),
+                            },
+                          ),
+                        ],
+                      );
+                    } else {
+                      return new Container();
+                    }
+                  }
+                ),
+              )
+              : GestureDetector(
+                onTap: () {
+                  if (isShowingUI) {
+                    isShowingUI = false;
+                    SystemChrome.setEnabledSystemUIOverlays([]);
+                  } else {
+                    isShowingUI = true;
+                    SystemChrome.setEnabledSystemUIOverlays(
+                        SystemUiOverlay.values);
+                  }
+                },
+                onHorizontalDragStart: (DragStartDetails details) {
+                  swipeXStart = details.localPosition.dx;
+                },
+                onHorizontalDragUpdate: (DragUpdateDetails details) {
+                  swipeXEnd = details.localPosition.dx;
+                },
+                onHorizontalDragEnd: (DragEndDetails details) {
+                  nextSlide();
+                },
+                child: PhotoView(
+                  imageProvider: DeviceImage(localImages[selectedIndex], scale: 1),
+                  scaleStateController: scaleStateController,
+                ),
+              ),
             ),
           ],
         ),
