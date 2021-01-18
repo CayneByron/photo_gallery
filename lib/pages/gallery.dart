@@ -2,12 +2,12 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:photo_gallery/pages/image_sort_order.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:local_image_provider/local_image_provider.dart';
-import 'package:local_image_provider/local_image.dart';
-import 'package:local_image_provider/local_album.dart';
 import 'package:photo_gallery/Widget/albums_list_widget.dart';
 import 'package:photo_gallery/Widget/images_list_widget.dart';
+import 'package:photo_manager/photo_manager.dart';
+import 'package:photo_gallery/pages/album_sort_order.dart';
 
 class Gallery extends StatefulWidget {
 @override
@@ -16,75 +16,142 @@ _GalleryState createState() => _GalleryState();
 
 class _GalleryState extends State<Gallery> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  TextEditingController usernameController = new TextEditingController();
-  TextEditingController passwordController = new TextEditingController();
   bool isLoading = false;
 
-  LocalImageProvider localImageProvider = LocalImageProvider();
-  List<LocalImage> localImages = [];
-  List<LocalAlbum> localAlbums = [];
-  LocalImage selectedImg;
-  LocalAlbum selectedAlbum;
+  List<AssetPathEntity> albumList = [];
+  List<AssetEntity> assetList = [];
+  Map thumbnailsMap = new Map();
+  Map imagesMap = new Map();
 
   @override
   void initState() {
     super.initState();
+    SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
     initPlatformState();
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
-    bool hasPermission = false;
-    List<LocalImage> images = [];
-    List<LocalAlbum> albums = [];
+    List<AssetPathEntity> tempAlbumList = await PhotoManager.getAssetPathList();
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String albumSortOrder = prefs.getString('albumSortOrder');
+    String selectedAlbumName = prefs.getString('selectedAlbum') ?? '';
+    tempAlbumList = sortAlbums(tempAlbumList, albumSortOrder);
+    AssetPathEntity selectedAlbum;
+    for (AssetPathEntity album in tempAlbumList) {
+      if (album.isAll) {
+        continue;
+      }
+      albumList.add(album);
+      assetList = await album.assetList;
+      Uint8List img = await assetList[0].thumbDataWithSize(100, 100);
+      thumbnailsMap[album.name] = img;
+      if (album.name == selectedAlbumName) {
+        selectedAlbum = album;
+      }
+    }
+    if (selectedAlbum != null) {
+      switchAlbum(selectedAlbum);
+    }
+    applySettings();
+  }
 
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    try {
-      hasPermission = await localImageProvider.hasPermission;
-      if (hasPermission) {
-        print('Already granted, initialize will not ask');
+  void switchAlbum(AssetPathEntity album) async {
+    if (isLoading) {
+      return;
+    }
+    setState(() {
+      isLoading = true;
+    });
+    imagesMap.clear();
+    assetList.clear();
+    assetList = await album.assetList;
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String imageSortOrder = prefs.getString('imageSortOrder');
+    prefs.setString('selectedAlbum', album.name);
+    assetList = sortAssetList(assetList, imageSortOrder);
+    for (AssetEntity asset in assetList) {
+      if (asset.type == AssetType.audio || asset.type == AssetType.other) {
+        continue;
       }
-      hasPermission = await localImageProvider.initialize();
-      if (hasPermission) {
-        await localImageProvider.cleanup();
-        albums = await localImageProvider.findAlbums(LocalAlbumType.all);
-      }
-    } on PlatformException catch (e) {
-      print('Local image provider failed: $e');
+      Uint8List img = await asset.thumbDataWithSize(100, 100);
+      imagesMap[asset.title] = img;
+      setState(() {});
+    }
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  List<AssetPathEntity> sortAlbums(List<AssetPathEntity> albumList, String albumSortOrder) {
+    if (albumSortOrder == AlbumSortOrder.ALBUM_NAME_ASC) {
+      albumList.sort((a, b) => a.name.toUpperCase().compareTo(b.name.toUpperCase()));
+    } else {
+      albumList.sort((a, b) => b.name.toUpperCase().compareTo(a.name.toUpperCase()));
     }
 
-    if (!mounted) return;
-
-    setState(() {
-      localImages.addAll(images);
-      localImages.sort((a, b) => a.creationDate.compareTo(b.creationDate));
-      localAlbums.addAll(albums);
-      localAlbums.sort((a, b) => a.title.compareTo(b.title));
-    });
+    return albumList;
   }
 
-  void switchAlbum(LocalAlbum album) async {
-    List<LocalImage> albumImages =
-    await localImageProvider.findImagesInAlbum(album.id, 10000);
-    setState(() {
-      localImages.clear();
-      localImages.addAll(albumImages);
-      selectedAlbum = album;
-    });
-    switchImage(album.coverImg, 'Album');
+  List<AssetEntity> sortAssetList(List<AssetEntity> assetList, String imageSortOrder) {
+    if (imageSortOrder == ImageSortOrder.IMAGE_TITLE_ASC) {
+      assetList.sort((a, b) => a.title.toUpperCase().compareTo(b.title));
+    } else if (imageSortOrder == ImageSortOrder.IMAGE_TITLE_DESC) {
+      assetList.sort((a, b) => b.title.toUpperCase().compareTo(a.title.toUpperCase()));
+    } else if (imageSortOrder == ImageSortOrder.IMAGE_DATE_ASC) {
+      assetList.sort((a, b) => a.modifiedDateTime.compareTo(b.modifiedDateTime));
+    } else if (imageSortOrder == ImageSortOrder.IMAGE_DATE_DESC) {
+      assetList.sort((a, b) => b.modifiedDateTime.compareTo(a.modifiedDateTime));
+    }
+
+    return assetList;
   }
 
-  void switchImage(LocalImage image, String src) {
-    setState(() {
-      selectedImg = image;
-    });
+  void applySettings() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String albumSortOrder = prefs.getString('albumSortOrder');
+    if (albumSortOrder?.isEmpty ?? true) {
+      albumSortOrder = AlbumSortOrder.ALBUM_NAME_ASC;
+    }
+    sortAlbums(albumList, albumSortOrder);
+    String imageSortOrder = prefs.getString('imageSortOrder');
+    if (imageSortOrder?.isEmpty ?? true) {
+      imageSortOrder = ImageSortOrder.IMAGE_DATE_DESC;
+    }
+    assetList = sortAssetList(assetList, imageSortOrder);
+    print('apply settings');
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      appBar: null,
+      appBar: AppBar(
+        title: Text('Photo Gallery'),
+        actions: [
+          Visibility(
+            visible: isLoading,
+            child: Padding(
+                padding: EdgeInsets.only(right: 20.0),
+                child: SpinKitFadingCube(
+                  color: Colors.white,
+                  size: 20.0,
+                )
+            ),
+          ),
+          Padding(
+              padding: EdgeInsets.only(right: 20.0),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(context, '/settings').then((value) => applySettings());
+                },
+                child: Icon(
+                    Icons.settings
+                ),
+              )
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Container(
           child: Row(
@@ -92,15 +159,13 @@ class _GalleryState extends State<Gallery> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               AlbumsListWidget(
-                localImages: localImages,
-                localAlbums: localAlbums,
                 switchAlbum: switchAlbum,
-                selectedAlbum: selectedAlbum,
+                albumList: albumList,
+                thumbnails: thumbnailsMap,
               ),
               ImagesListWidget(
-                localImages: localImages,
-                switchImage: switchImage,
-                selectedImage: selectedImg,
+                images: imagesMap,
+                assetList: assetList,
               ),
             ],
           ),

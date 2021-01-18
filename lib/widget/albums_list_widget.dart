@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:local_image_provider/local_image.dart';
-import 'package:local_image_provider/local_album.dart';
-import 'package:local_image_provider/device_image.dart';
+import 'package:photo_manager/photo_manager.dart';
+import 'dart:typed_data';
+
+import 'dart:async';
+import 'package:async/async.dart';
+
 
 class AlbumsListWidget extends StatelessWidget {
   const AlbumsListWidget({
     Key key,
-    this.localImages,
-    this.localAlbums,
     this.switchAlbum,
-    this.selectedAlbum,
+    this.albumList,
+    this.thumbnails,
   }) : super(key: key);
 
-  final List<LocalImage> localImages;
-  final List<LocalAlbum> localAlbums;
-  final void Function(LocalAlbum album) switchAlbum;
-  final LocalAlbum selectedAlbum;
+  final void Function(AssetPathEntity album) switchAlbum;
+  final List<AssetPathEntity> albumList;
+  final Map thumbnails;
 
   @override
   Widget build(BuildContext context) {
@@ -33,12 +34,12 @@ class AlbumsListWidget extends StatelessWidget {
                   color: Colors.transparent,
                   height: 0,
                 ),
-                itemCount: localAlbums.length,
+                itemCount: albumList.length,
                 itemBuilder: (context, index) => Padding(
                   padding: EdgeInsets.all(8.0),
                   child: GestureDetector(
                     onTap: () async {
-                      switchAlbum(localAlbums[index]);
+                      switchAlbum(albumList[index]);
                     },
                     child: Card(
                       elevation: 5.0,
@@ -53,7 +54,7 @@ class AlbumsListWidget extends StatelessWidget {
                                     image: DecorationImage(
                                       fit: BoxFit.fitWidth,
                                       alignment: FractionalOffset.topCenter,
-                                      image: DeviceImage(localAlbums[index].coverImg, scale: localAlbums[index].coverImg.scaleToFit(487, 451)),
+                                      image: MemoryImage(thumbnails[albumList[index].name], scale: 1.0),
                                     )
                                 ),
                               ),
@@ -61,7 +62,7 @@ class AlbumsListWidget extends StatelessWidget {
                             Padding(
                               padding: const EdgeInsets.all(4.0),
                               child: Text(
-                                localAlbums[index].title,
+                                albumList[index].name,
                                 style: TextStyle(
                                     fontSize: 12.0,
                                     fontWeight: FontWeight.bold,

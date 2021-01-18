@@ -1,43 +1,20 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:local_image_provider/local_image.dart';
-import 'package:local_image_provider/local_image_provider.dart';
-import 'package:local_image_provider/device_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:export_video_frame/export_video_frame.dart';
+import 'package:photo_manager/photo_manager.dart';
 
 class ImagesListWidget extends StatelessWidget {
   const ImagesListWidget({
     Key key,
-    this.localImages,
-    this.switchImage,
-    this.selectedImage,
+    this.images,
+    this.assetList,
   }) : super(key: key);
 
-  final List<LocalImage> localImages;
-  final void Function(LocalImage image, String src) switchImage;
-  final LocalImage selectedImage;
-
-  Future<Image> getVideoThumbnail(int index) async {
-    if (!localImages[index].isVideo) {
-      return null;
-    }
-    String videoPath = await LocalImageProvider().videoFile(localImages[index].id);
-    print(videoPath);
-    File videoFile = File(videoPath);
-    if (!videoFile.existsSync()) {
-      print("Thumbnail: No such file");
-      return null;
-    }
-
-    print("Thumbnail: The file does exist");
-    var file = videoFile; //await ImagePicker.pickVideo(source: ImageSource.gallery);
-    var duration = Duration(seconds: 1);
-    File image = await ExportVideoFrame.exportImageBySeconds(file, duration, 0);
-    return Image.file(image);
-  }
+  final Map images;
+  final List<AssetEntity> assetList;
 
   @override
   Widget build(BuildContext context) {
@@ -55,16 +32,33 @@ class ImagesListWidget extends StatelessWidget {
                 child: Scrollbar(
                   isAlwaysShown: false,
                   child: GridView.count(
-                    // Create a grid with 2 columns. If you change the scrollDirection to
-                    // horizontal, this produces 2 rows.
                     crossAxisCount: 2,
-                    // Generate 100 widgets that display their index in the List.
-                    children: List.generate(localImages.length, (index) {
+                    children: List.generate(images.length, (index) {
                       return GestureDetector(
                         onTap: () async {
-                          Navigator.pushNamed(context, '/view', arguments: {
-                            'localImages': localImages,
-                            'selectedIndex': index,
+                          print('tap');
+                          AssetEntity entity = assetList[index];
+                          if (entity.type == AssetType.image) {
+                            Uint8List fullSizedImage = await entity.originBytes;
+                            Navigator.pushNamed(context, '/view', arguments: {
+                              'assetList': assetList,
+                              'image': fullSizedImage,
+                              'selectedIndex': index,
+                            });
+                          } else if (entity.type == AssetType.video) {
+                            Navigator.pushNamed(context, '/view_video', arguments: {
+                              'entity': entity,
+                            });
+                          }
+                        },
+                        onLongPress: () async {
+                          AssetEntity entity = assetList[index];
+                          Uint8List fullSizedImage = await entity.originBytes;
+                          File file = await entity.file;
+                          Navigator.pushNamed(context, '/info', arguments: {
+                            'image': fullSizedImage,
+                            'file': file,
+                            'entity': entity,
                           });
                         },
                         child: Center(
@@ -83,37 +77,26 @@ class ImagesListWidget extends StatelessWidget {
                                 ),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(12),
-                                  child: localImages[index].isImage ? Image(
-                                      image: DeviceImage(localImages[index], scale: localImages[index].scaleToFit(200, 200)),
-                                      fit: BoxFit.fitWidth,
-                                  ) : Stack(
-                                    children: [
-                                      Container(
-                                        decoration: new BoxDecoration(color: Colors.white),
+                                  child: assetList[index].type == AssetType.image ? Image(
+                                      image: MemoryImage(images[assetList[index].title]),
+                                      fit: BoxFit.cover,
+                                  ) : assetList[index].type == AssetType.video ? Stack(
+                                    fit: StackFit.expand,
+                                    children: <Widget>[
+                                      Image(
+                                        image: MemoryImage(images[assetList[index].title]),
+                                        fit: BoxFit.cover,
+                                      ),
+                                      Align(
                                         alignment: Alignment.center,
-                                        child: FutureBuilder(
-                                          future: getVideoThumbnail(index),
-                                          builder: (BuildContext context, AsyncSnapshot<Image> image) {
-                                            if (image.hasData) {
-                                              return image.data;  // image is ready
-                                            } else {
-                                              return new Container();  // placeholder
-                                            }
-                                          },
-                                        )
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(16.0),
-                                        child: Align(
-                                          alignment: Alignment.center,
-                                          child: Icon(Icons.play_arrow,
-                                            color: Colors.white,
-                                            size: 40.0,
-                                          ),
+                                        child: Icon(
+                                          Icons.play_arrow_rounded,
+                                          color: Colors.white,
+                                          size: 38.0,
                                         ),
-                                      ),
+                                      )
                                     ],
-                                  ),
+                                  ) : null
                                 ),
                               ),
                             ),
