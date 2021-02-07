@@ -3,6 +3,7 @@ import 'package:photo_gallery/pages/album_sort_order.dart';
 import 'package:photo_gallery/pages/image_information.dart';
 import 'package:photo_gallery/pages/image_sort_order.dart';
 import 'package:photo_gallery/pages/gallery.dart';
+import 'package:photo_gallery/pages/rename.dart';
 import 'package:photo_gallery/pages/view_image.dart';
 import 'package:photo_gallery/pages/move_folder.dart';
 import 'package:photo_gallery/pages/settings.dart';
@@ -31,6 +32,7 @@ void main() => runApp(MaterialApp(
     '/settings': (context) => Settings(),
     '/albumSortOrder': (context) => AlbumSortOrder(),
     '/imageSortOrder': (context) => ImageSortOrder(),
-    '/rename': (context) => MoveFolder(),
+    '/move': (context) => MoveFolder(),
+    '/rename': (context) => Rename(),
   },
 ));

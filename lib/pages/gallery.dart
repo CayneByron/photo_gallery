@@ -9,6 +9,8 @@ import 'package:photo_gallery/Widget/images_list_widget.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_gallery/pages/album_sort_order.dart';
 
+import 'package:flutter/cupertino.dart';
+
 class Gallery extends StatefulWidget {
 @override
 _GalleryState createState() => _GalleryState();
@@ -17,11 +19,13 @@ _GalleryState createState() => _GalleryState();
 class _GalleryState extends State<Gallery> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   bool isLoading = false;
+  String title = 'Photo Gallery';
 
   List<AssetPathEntity> albumList = [];
   List<AssetEntity> assetList = [];
   Map thumbnailsMap = new Map();
   Map imagesMap = new Map();
+  AssetPathEntity selectedAlbum;
 
   @override
   void initState() {
@@ -31,12 +35,17 @@ class _GalleryState extends State<Gallery> {
   }
 
   Future<void> initPlatformState() async {
+    PhotoManager.forceOldApi();
+    loadAll();
+  }
+
+  void loadAll() async {
     List<AssetPathEntity> tempAlbumList = await PhotoManager.getAssetPathList();
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String albumSortOrder = prefs.getString('albumSortOrder');
     String selectedAlbumName = prefs.getString('selectedAlbum') ?? '';
     tempAlbumList = sortAlbums(tempAlbumList, albumSortOrder);
-    AssetPathEntity selectedAlbum;
+
     for (AssetPathEntity album in tempAlbumList) {
       if (album.isAll) {
         continue;
@@ -62,12 +71,31 @@ class _GalleryState extends State<Gallery> {
     setState(() {
       isLoading = true;
     });
+
+    List<AssetPathEntity> tempAlbumList = await PhotoManager.getAssetPathList();
+    for (AssetPathEntity tempAlbum in tempAlbumList) {
+      if (tempAlbum.id == album.id) {
+        album = tempAlbum;
+      }
+    }
+
+    album.getAssetListRange(start: 0, end: album.assetCount).then((value) {
+      if (value.isEmpty) {
+        return;
+      }
+      if (mounted) {
+        return;
+      }
+    });
+
+    title = album.name;
     imagesMap.clear();
     assetList.clear();
     assetList = await album.assetList;
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String imageSortOrder = prefs.getString('imageSortOrder');
-    prefs.setString('selectedAlbum', album.name);
+    selectedAlbum = album;
+    prefs.setString('selectedAlbum', selectedAlbum.name);
     assetList = sortAssetList(assetList, imageSortOrder);
     for (AssetEntity asset in assetList) {
       if (asset.type == AssetType.audio || asset.type == AssetType.other) {
@@ -127,7 +155,7 @@ class _GalleryState extends State<Gallery> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text('Photo Gallery'),
+        title: Text(title),
         actions: [
           Visibility(
             visible: isLoading,
@@ -164,8 +192,11 @@ class _GalleryState extends State<Gallery> {
                 thumbnails: thumbnailsMap,
               ),
               ImagesListWidget(
+                album: selectedAlbum,
+                switchAlbum: switchAlbum,
                 images: imagesMap,
                 assetList: assetList,
+                scaffoldKey: _scaffoldKey,
               ),
             ],
           ),

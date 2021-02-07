@@ -6,6 +6,7 @@ import 'package:photo_view/photo_view.dart';
 import 'package:video_player/video_player.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:settings_ui/settings_ui.dart';
+import 'package:path/path.dart' as path;
 
 class ImageInformation extends StatefulWidget {
   @override
@@ -14,10 +15,14 @@ class ImageInformation extends StatefulWidget {
 
 class _ImageInformationState extends State<ImageInformation> {
   Map data = {};
-  List<AssetEntity> assetList = [];
+  // List<AssetEntity> assetList = [];
   Uint8List image;
   File file;
   AssetEntity entity;
+  AssetPathEntity currentAlbum;
+  String title = '';
+  String folder = '';
+  String id = '';
 
   @override
   void initState() {
@@ -31,7 +36,29 @@ class _ImageInformationState extends State<ImageInformation> {
     data = data.isNotEmpty ? data : ModalRoute.of(context).settings.arguments;
     image = data['image'];
     file = data['file'];
-    entity = data['entity'];
+    currentAlbum = data['currentAlbum'];
+    entity = (entity == null) ? data['entity'] : entity;
+
+    void updateInfo() async {
+      List<AssetPathEntity> tempAlbumList = await PhotoManager.getAssetPathList();
+      for (AssetPathEntity album in tempAlbumList) {
+        if (album.name == entity.relativePath.split("/")[entity.relativePath.split("/").length-2]) {
+          List<AssetEntity> newAssetList = await album.assetList;
+          for (AssetEntity newAsset in newAssetList) {
+            if (newAsset.id == entity.id) {
+              setState(() {
+                entity = newAsset;
+              });
+            }
+          }
+        }
+      }
+    }
+
+    void foo(Object value) async {
+      print('foo');
+      print(value);
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -45,28 +72,59 @@ class _ImageInformationState extends State<ImageInformation> {
             Flexible(
               child: Image.memory(image),
             ),
+            ButtonBar(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                RaisedButton(
+                  child: new Text('Move'),
+                  onPressed: () async {
+                    List<AssetPathEntity> albumList = await PhotoManager.getAssetPathList();
+                    albumList.sort((a, b) => a.name.compareTo(b.name));
+                    albumList.remove(currentAlbum);
+                    final newId = await Navigator.pushNamed(context, '/move', arguments: {
+                      'image': image,
+                      'file': file,
+                      'entity': entity,
+                      'albumList': albumList
+                    });
+                    print('result:');
+                    print(newId);
+                    List<AssetPathEntity> tempAlbumList = await PhotoManager.getAssetPathList();
+                    for (AssetPathEntity album in tempAlbumList) {
+                      List<AssetEntity> newAssetList = await album.assetList;
+                      for (AssetEntity newAsset in newAssetList) {
+                        if (newAsset.id == newId) {
+                          setState(() {
+                            entity = newAsset;
+                          });
+                        }
+                      }
+                    }
+                  },
+                ),
+                RaisedButton(
+                  child: new Text('Rename'),
+                  onPressed: () async {
+                    Navigator.pushNamed(context, '/rename', arguments: {
+                      'entity': entity,
+                    }).then((value) => updateInfo());
+                  },
+                ),
+              ],
+            ),
             Expanded(
-              flex: 3,
+              flex: 2,
               child: SettingsList(
-                // backgroundColor: Colors.orange,
                 sections: [
                   SettingsSection(
                     title: '',
-                    // titleTextStyle: TextStyle(fontSize: 30),
                     tiles: [
                       SettingsTile(
                         title: 'Title',
                         subtitle: entity.title,
                         leading: Icon(Icons.language),
                         onTap: () async {
-                          List<AssetPathEntity> albumList = await PhotoManager.getAssetPathList();
-                          albumList.sort((a, b) => a.name.compareTo(b.name));
-                          Navigator.pushNamed(context, '/rename', arguments: {
-                            'image': image,
-                            'file': file,
-                            'entity': entity,
-                            'albumList': albumList
-                          }).then((value) => {});
+
                         },
                       ),
                       SettingsTile(
@@ -120,36 +178,9 @@ class _ImageInformationState extends State<ImageInformation> {
                       ),
                     ],
                   ),
-                  // SettingsSection(
-                  //   title: 'File',
-                  //   tiles: [
-                  //     SettingsTile(
-                  //       title: 'Type',
-                  //       subtitle: file.runtimeType.toString(),
-                  //       leading: Icon(Icons.language),
-                  //       onTap: () {
-                  //       },
-                  //     ),
-                  //     SettingsTile(
-                  //       title: 'URI',
-                  //       subtitle: file.uri.toString(),
-                  //       leading: Icon(Icons.language),
-                  //       onTap: () {
-                  //       },
-                  //     ),
-                  //     SettingsTile(
-                  //       title: 'Path',
-                  //       subtitle: file.path,
-                  //       leading: Icon(Icons.language),
-                  //       onTap: () {
-                  //       },
-                  //     ),
-                  //   ],
-                  // ),
                 ],
               ),
             ),
-
           ],
         ),
       ),

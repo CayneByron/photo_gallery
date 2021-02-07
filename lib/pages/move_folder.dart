@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 
 class MoveFolder extends StatefulWidget {
   @override
@@ -14,6 +14,7 @@ class MoveFolder extends StatefulWidget {
 }
 
 class _MoveFolderState extends State<MoveFolder> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   TextEditingController fileNameController = new TextEditingController();
   Map data = {};
   List<AssetEntity> assetList = [];
@@ -36,6 +37,7 @@ class _MoveFolderState extends State<MoveFolder> {
     albumList = data['albumList'];
 
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(title: Text('Move File')),
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
@@ -56,16 +58,26 @@ class _MoveFolderState extends State<MoveFolder> {
                   child: Card(
                     child: ListTile(
                       onTap: () async {
-                        Uint8List bytes = await entity.originBytes;
-                        File originFile = await entity.originFile;
-                        final newFile = await originFile.copy(originFile.path + 'ZZZZ_abcdefg123456789.jpg');
-                        print(newFile.path);
-                        // File newFile = await originFile.rename(originFile.path + 'ZZZZ_abcdefg123456789.jpg');
-                        // newFile.writeAsBytes(bytes);
-
-                        // bool success = await PhotoManager.editor.android.moveAssetToAnother(entity: entity, target: albumList[index]);
-                        // print('success: ' + success.toString());
-                        // Navigator.pop(context);
+                        print('Found ${albumList[index]}');
+                        print('old id: ' + entity.id);
+                        AssetEntity copy = await PhotoManager.editor.copyAssetToPath(asset: entity, pathEntity: albumList[index]);
+                        print(copy);
+                        if (copy == null) {
+                          final snackBar = SnackBar(
+                            content: Text('Cannot move asset to ${albumList[index].name}'),
+                            backgroundColor: Colors.red[600],
+                            action: SnackBarAction(
+                              label: 'Error',
+                              onPressed: () {},
+                            ),
+                          );
+                          _scaffoldKey.currentState.showSnackBar(snackBar);
+                        } else {
+                          print('new id: ' + copy.id);
+                          File file = await entity.file;
+                          await file.delete();
+                          Navigator.pop(context, copy.id);
+                        }
                       },
                       title: Text(albumList[index].name),
                       leading: Icon(Icons.local_shipping),

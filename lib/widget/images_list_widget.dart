@@ -9,12 +9,23 @@ import 'package:photo_manager/photo_manager.dart';
 class ImagesListWidget extends StatelessWidget {
   const ImagesListWidget({
     Key key,
+    this.album,
+    this.switchAlbum,
     this.images,
     this.assetList,
+    this.scaffoldKey,
   }) : super(key: key);
 
+  final AssetPathEntity album;
   final Map images;
   final List<AssetEntity> assetList;
+  final scaffoldKey;// = GlobalKey<ScaffoldState>();
+  final void Function(AssetPathEntity album) switchAlbum;
+
+  void loadAll() async {
+    print('ALBUM NAME ' + album.name);
+    switchAlbum(album);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,11 +66,16 @@ class ImagesListWidget extends StatelessWidget {
                           AssetEntity entity = assetList[index];
                           Uint8List fullSizedImage = await entity.originBytes;
                           File file = await entity.file;
+                          print(file.path);
+                          File originFile = await entity.originFile;
+                          print(originFile.path);
+
                           Navigator.pushNamed(context, '/info', arguments: {
                             'image': fullSizedImage,
                             'file': file,
+                            'currentAlbum': album,
                             'entity': entity,
-                          });
+                          }).then((value) => loadAll());
                         },
                         child: Center(
                           child: Padding(
