@@ -1,10 +1,11 @@
-import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:photo_gallery/modals/modal_fit.dart';
 
 class ImagesListWidget extends StatelessWidget {
   const ImagesListWidget({
@@ -19,13 +20,8 @@ class ImagesListWidget extends StatelessWidget {
   final AssetPathEntity album;
   final Map images;
   final List<AssetEntity> assetList;
-  final scaffoldKey;// = GlobalKey<ScaffoldState>();
+  final scaffoldKey;
   final void Function(AssetPathEntity album) switchAlbum;
-
-  void loadAll() async {
-    print('ALBUM NAME ' + album.name);
-    switchAlbum(album);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +43,6 @@ class ImagesListWidget extends StatelessWidget {
                     children: List.generate(images.length, (index) {
                       return GestureDetector(
                         onTap: () async {
-                          print('tap');
                           AssetEntity entity = assetList[index];
                           if (entity.type == AssetType.image) {
                             Uint8List fullSizedImage = await entity.originBytes;
@@ -63,19 +58,19 @@ class ImagesListWidget extends StatelessWidget {
                           }
                         },
                         onLongPress: () async {
-                          AssetEntity entity = assetList[index];
-                          Uint8List fullSizedImage = await entity.originBytes;
-                          File file = await entity.file;
-                          print(file.path);
-                          File originFile = await entity.originFile;
-                          print(originFile.path);
-
-                          Navigator.pushNamed(context, '/info', arguments: {
-                            'image': fullSizedImage,
-                            'file': file,
-                            'currentAlbum': album,
-                            'entity': entity,
-                          }).then((value) => loadAll());
+                          showMaterialModalBottomSheet(
+                            expand: false,
+                            context: context,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) => ModalFit(
+                              album: this.album,
+                              switchAlbum: this.switchAlbum,
+                              images: this.images,
+                              assetList: this.assetList,
+                              scaffoldKey: this.scaffoldKey,
+                              index: index,
+                            ),
+                          );
                         },
                         child: Center(
                           child: Padding(

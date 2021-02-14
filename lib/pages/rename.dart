@@ -72,10 +72,8 @@ class _RenameState extends State<Rename> {
                 }
                 try {
                   file.copySync(newPath);
-                  print('try');
                   Navigator.pop(context);
                 } catch(e) {
-                  print('catch');
                   final snackBar = SnackBar(
                     content: Text(e.errMsg()),
                     backgroundColor: Colors.red[600],

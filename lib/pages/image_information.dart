@@ -26,7 +26,6 @@ class _ImageInformationState extends State<ImageInformation> {
 
   @override
   void initState() {
-    print('IMAGE INFORMATION');
     super.initState();
     SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
   }
@@ -55,11 +54,6 @@ class _ImageInformationState extends State<ImageInformation> {
       }
     }
 
-    void foo(Object value) async {
-      print('foo');
-      print(value);
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Details'),
@@ -71,46 +65,6 @@ class _ImageInformationState extends State<ImageInformation> {
           children: <Widget>[
             Flexible(
               child: Image.memory(image),
-            ),
-            ButtonBar(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                RaisedButton(
-                  child: new Text('Move'),
-                  onPressed: () async {
-                    List<AssetPathEntity> albumList = await PhotoManager.getAssetPathList();
-                    albumList.sort((a, b) => a.name.compareTo(b.name));
-                    albumList.remove(currentAlbum);
-                    final newId = await Navigator.pushNamed(context, '/move', arguments: {
-                      'image': image,
-                      'file': file,
-                      'entity': entity,
-                      'albumList': albumList
-                    });
-                    print('result:');
-                    print(newId);
-                    List<AssetPathEntity> tempAlbumList = await PhotoManager.getAssetPathList();
-                    for (AssetPathEntity album in tempAlbumList) {
-                      List<AssetEntity> newAssetList = await album.assetList;
-                      for (AssetEntity newAsset in newAssetList) {
-                        if (newAsset.id == newId) {
-                          setState(() {
-                            entity = newAsset;
-                          });
-                        }
-                      }
-                    }
-                  },
-                ),
-                RaisedButton(
-                  child: new Text('Rename'),
-                  onPressed: () async {
-                    Navigator.pushNamed(context, '/rename', arguments: {
-                      'entity': entity,
-                    }).then((value) => updateInfo());
-                  },
-                ),
-              ],
             ),
             Expanded(
               flex: 2,

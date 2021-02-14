@@ -1,12 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:settings_ui/settings_ui.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:path/path.dart' as path;
+
 
 class MoveFolder extends StatefulWidget {
   @override
@@ -22,6 +19,8 @@ class _MoveFolderState extends State<MoveFolder> {
   File file;
   AssetEntity entity;
   List<AssetPathEntity> albumList = [];
+  bool isMove = true;
+  String title = 'Move File';
 
   @override
   void initState() {
@@ -35,10 +34,12 @@ class _MoveFolderState extends State<MoveFolder> {
     file = data['file'];
     entity = data['entity'];
     albumList = data['albumList'];
+    isMove = data['isMove'];
+    title = (isMove ? 'Move File' : 'Copy File');
 
     return Scaffold(
       key: _scaffoldKey,
-      appBar: AppBar(title: Text('Move File')),
+      appBar: AppBar(title: Text(title)),
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
 
@@ -58,10 +59,7 @@ class _MoveFolderState extends State<MoveFolder> {
                   child: Card(
                     child: ListTile(
                       onTap: () async {
-                        print('Found ${albumList[index]}');
-                        print('old id: ' + entity.id);
                         AssetEntity copy = await PhotoManager.editor.copyAssetToPath(asset: entity, pathEntity: albumList[index]);
-                        print(copy);
                         if (copy == null) {
                           final snackBar = SnackBar(
                             content: Text('Cannot move asset to ${albumList[index].name}'),
@@ -73,9 +71,10 @@ class _MoveFolderState extends State<MoveFolder> {
                           );
                           _scaffoldKey.currentState.showSnackBar(snackBar);
                         } else {
-                          print('new id: ' + copy.id);
-                          File file = await entity.file;
-                          await file.delete();
+                          if (isMove) {
+                            File file = await entity.file;
+                            await file.delete();
+                          }
                           Navigator.pop(context, copy.id);
                         }
                       },
