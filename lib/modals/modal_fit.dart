@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:image_cropper/image_cropper.dart';
 
 class ModalFit extends StatelessWidget {
   const ModalFit({
@@ -79,8 +80,8 @@ class ModalFit extends StatelessWidget {
                   albumList.sort((a, b) => a.name.compareTo(b.name));
                   albumList.remove(album);
                   AssetEntity entity = assetList[index];
-                  Uint8List fullSizedImage = await entity.originBytes;
                   File file = await entity.file;
+                  Uint8List fullSizedImage = await entity.originBytes;
                   final newId = await Navigator.pushNamed(context, '/move', arguments: {
                     'image': fullSizedImage,
                     'file': file,
@@ -91,6 +92,53 @@ class ModalFit extends StatelessWidget {
                   loadAll();
                   Navigator.of(context).pop();
                 }
+              ),
+              Visibility(
+                visible: (assetList[index].type == AssetType.image),
+                child: ListTile(
+                    title: Text('Crop'),
+                    leading: Icon(Icons.crop),
+                    onTap: () async {
+                      print('trying to crop');
+                      AssetEntity entity = assetList[index];
+                      File imageFile = await entity.file;
+                      File croppedFile = await ImageCropper.cropImage(
+                          sourcePath: imageFile.path,
+                          aspectRatioPresets: Platform.isAndroid
+                              ? [
+                            CropAspectRatioPreset.square,
+                            CropAspectRatioPreset.ratio3x2,
+                            CropAspectRatioPreset.original,
+                            CropAspectRatioPreset.ratio4x3,
+                            CropAspectRatioPreset.ratio16x9
+                          ]
+                              : [
+                            CropAspectRatioPreset.original,
+                            CropAspectRatioPreset.square,
+                            CropAspectRatioPreset.ratio3x2,
+                            CropAspectRatioPreset.ratio4x3,
+                            CropAspectRatioPreset.ratio5x3,
+                            CropAspectRatioPreset.ratio5x4,
+                            CropAspectRatioPreset.ratio7x5,
+                            CropAspectRatioPreset.ratio16x9
+                          ],
+                          androidUiSettings: AndroidUiSettings(
+                              toolbarTitle: 'Cropper',
+                              toolbarColor: Colors.deepOrange,
+                              toolbarWidgetColor: Colors.white,
+                              initAspectRatio: CropAspectRatioPreset.original,
+                              lockAspectRatio: false),
+                          iosUiSettings: IOSUiSettings(
+                            title: 'Cropper',
+                          ));
+                      if (croppedFile != null) {
+                        imageFile.writeAsBytesSync(croppedFile.readAsBytesSync());
+                      }
+                      loadAll();
+                      Navigator.of(context).pop();
+                    }
+                  // onTap: () => Navigator.of(context).pop(),
+                ),
               ),
               ListTile(
                 title: Text('Delete'),
@@ -136,7 +184,7 @@ class ModalFit extends StatelessWidget {
                   );
                 }
                 // onTap: () => Navigator.of(context).pop(),
-              )
+              ),
             ],
           ),
         ));
