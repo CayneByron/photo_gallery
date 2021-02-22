@@ -103,10 +103,18 @@ class ImagesListWidget extends StatelessWidget {
                                         alignment: Alignment.center,
                                         child: Icon(
                                           Icons.play_arrow_rounded,
-                                          color: Colors.white,
+                                          color: Colors.black,
                                           size: 38.0,
                                         ),
-                                      )
+                                      ),
+                                      Align(
+                                        alignment: Alignment.center,
+                                        child: Icon(
+                                          Icons.play_arrow_rounded,
+                                          color: Colors.white,
+                                          size: 36.0,
+                                        ),
+                                      ),
                                     ],
                                   ) : null
                                 ),
