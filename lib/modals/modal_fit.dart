@@ -10,18 +10,16 @@ class ModalFit extends StatelessWidget {
     Key key,
     this.album,
     this.switchAlbum,
-    this.images,
-    this.assetList,
+    this.asset,
     this.scaffoldKey,
-    this.index,
+    this.image,
   }) : super(key: key);
 
   final AssetPathEntity album;
-  final Map images;
-  final List<AssetEntity> assetList;
+  final Uint8List image;
+  final AssetEntity asset;
   final scaffoldKey;
   final void Function(AssetPathEntity album) switchAlbum;
-  final int index;
 
   void loadAll() async {
     switchAlbum(album);
@@ -35,14 +33,27 @@ class ModalFit extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 0.0),
+                child: Container(
+                  height: 120,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                      fit: BoxFit.none,
+                      image: MemoryImage(image)
+                    ),
+                  ),
+                ),
+              ),
               ListTile(
                 title: Text('Details'),
                 leading: Icon(Icons.info),
                 onTap: () async {
-                  AssetEntity entity = assetList[index];
+                  AssetEntity entity = asset;
                   Uint8List fullSizedImage = await entity.originBytes;
                   File file = await entity.file;
-                  File originFile = await entity.originFile;
+                  // File originFile = await entity.originFile;
                   Navigator.pushNamed(context, '/info', arguments: {
                     'image': fullSizedImage,
                     'file': file,
@@ -58,10 +69,10 @@ class ModalFit extends StatelessWidget {
                   List<AssetPathEntity> albumList = await PhotoManager.getAssetPathList();
                   albumList.sort((a, b) => a.name.compareTo(b.name));
                   albumList.remove(album);
-                  AssetEntity entity = assetList[index];
+                  AssetEntity entity = asset;
                   Uint8List fullSizedImage = await entity.originBytes;
                   File file = await entity.file;
-                  final newId = await Navigator.pushNamed(context, '/move', arguments: {
+                  await Navigator.pushNamed(context, '/move', arguments: {
                     'image': fullSizedImage,
                     'file': file,
                     'entity': entity,
@@ -79,10 +90,10 @@ class ModalFit extends StatelessWidget {
                   List<AssetPathEntity> albumList = await PhotoManager.getAssetPathList();
                   albumList.sort((a, b) => a.name.compareTo(b.name));
                   albumList.remove(album);
-                  AssetEntity entity = assetList[index];
+                  AssetEntity entity = asset;
                   File file = await entity.file;
                   Uint8List fullSizedImage = await entity.originBytes;
-                  final newId = await Navigator.pushNamed(context, '/move', arguments: {
+                  await Navigator.pushNamed(context, '/move', arguments: {
                     'image': fullSizedImage,
                     'file': file,
                     'entity': entity,
@@ -94,13 +105,13 @@ class ModalFit extends StatelessWidget {
                 }
               ),
               Visibility(
-                visible: (assetList[index].type == AssetType.image),
+                visible: (asset.type == AssetType.image),
                 child: ListTile(
                     title: Text('Crop'),
                     leading: Icon(Icons.crop),
                     onTap: () async {
                       print('trying to crop');
-                      AssetEntity entity = assetList[index];
+                      AssetEntity entity = asset;
                       File imageFile = await entity.file;
                       File croppedFile = await ImageCropper.cropImage(
                           sourcePath: imageFile.path,
@@ -137,14 +148,12 @@ class ModalFit extends StatelessWidget {
                       loadAll();
                       Navigator.of(context).pop();
                     }
-                  // onTap: () => Navigator.of(context).pop(),
                 ),
               ),
               ListTile(
                 title: Text('Delete'),
                 leading: Icon(Icons.delete),
                 onTap: () async {
-                  // set up the buttons
                   Widget cancelButton = FlatButton(
                     child: Text("Cancel"),
                     onPressed:  () {
@@ -156,7 +165,7 @@ class ModalFit extends StatelessWidget {
                   Widget continueButton = FlatButton(
                     child: Text("Continue"),
                     onPressed:  () async {
-                      AssetEntity entity = assetList[index];
+                      AssetEntity entity = asset;
                       File file = await entity.file;
                       await file.delete();
                       loadAll();
@@ -164,18 +173,14 @@ class ModalFit extends StatelessWidget {
                       Navigator.of(context).pop();
                     },
                   );
-
-                  // set up the AlertDialog
                   AlertDialog alert = AlertDialog(
-                    title: Text("AlertDialog"),
-                    content: Text("Are you sure? Delete action cannot be undone."),
+                    title: Text("Delete"),
+                    content: Text("Are you sure you want to delete? Action cannot be undone."),
                     actions: [
                       cancelButton,
                       continueButton,
                     ],
                   );
-
-                  // show the dialog
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {

@@ -24,8 +24,11 @@ class _ImageSortOrderState extends State<ImageSortOrder> {
   void setPreference() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String imageSortOrder = prefs.getString('imageSortOrder');
+    print('GET imageSortOrder: ' + imageSortOrder);
     if (imageSortOrder.isNotEmpty) {
       sortLabel = imageSortOrder;
+    } else {
+      sortLabel = ImageSortOrder.IMAGE_DATE_DESC;
     }
     setState(() {});
   }
@@ -72,6 +75,8 @@ class _ImageSortOrderState extends State<ImageSortOrder> {
   }
 
   Widget trailingWidget(String label) {
+    print('trailingWidget label: ' + label);
+    print('trailingWidget sortLabel: ' + sortLabel);
     return (sortLabel == label)
         ? Icon(Icons.check, color: Colors.blue)
         : Icon(null);

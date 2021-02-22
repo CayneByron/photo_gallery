@@ -15,10 +15,10 @@ void main() => runApp(MaterialApp(
   onGenerateRoute: (settings) {
     switch (settings.name) {
       case '/view_left':
-        return PageTransition(child: FullSizeImage(), type: PageTransitionType.leftToRightWithFade, settings: settings,);
+        return PageTransition(child: ViewImage(), type: PageTransitionType.leftToRightWithFade, settings: settings,);
         break;
       case '/view_right':
-        return PageTransition(child: FullSizeImage(), type: PageTransitionType.rightToLeftWithFade, settings: settings,);
+        return PageTransition(child: ViewImage(), type: PageTransitionType.rightToLeftWithFade, settings: settings,);
         break;
       default:
         return null;
@@ -26,7 +26,7 @@ void main() => runApp(MaterialApp(
   },
   routes: {
     '/': (context) => Gallery(),
-    '/view': (context) => FullSizeImage(),
+    '/view': (context) => ViewImage(),
     '/view_video': (context) => ViewVideo(),
     '/info': (context) => ImageInformation(),
     '/settings': (context) => Settings(),

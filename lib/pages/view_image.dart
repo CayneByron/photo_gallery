@@ -1,19 +1,16 @@
-import 'dart:async';
-import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:video_player/video_player.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-class FullSizeImage extends StatefulWidget {
+class ViewImage extends StatefulWidget {
   @override
-  _FullSizeImageState createState() => _FullSizeImageState();
+  _ViewImageState createState() => _ViewImageState();
 }
 
-class _FullSizeImageState extends State<FullSizeImage> {
+class _ViewImageState extends State<ViewImage> {
   Map data = {};
   int selectedIndex = 0;
   double swipeXStart = 0.0;
@@ -23,6 +20,7 @@ class _FullSizeImageState extends State<FullSizeImage> {
   bool isShowingUI = false;
   List<AssetEntity> assetList = [];
   Uint8List image;
+  AssetEntity entity;
 
   @override
   void initState() {
@@ -59,7 +57,7 @@ class _FullSizeImageState extends State<FullSizeImage> {
         arguments: {
           'assetList': assetList,
           'image': nextImage,
-          'selectedIndex': nextIndex,
+          'entity': entity,
         }
     );
   }
@@ -70,7 +68,13 @@ class _FullSizeImageState extends State<FullSizeImage> {
     assetList = data['assetList'];
     assetList = assetList.where((i) => i.type == AssetType.image).toList();
     image = data['image'];
-    selectedIndex = data['selectedIndex'];
+    entity = data['entity'];
+    for (int i = 0; i < assetList.length; i++) {
+      if (entity.id == assetList[i].id) {
+        selectedIndex = i;
+        break;
+      }
+    }
     photoController = PhotoViewController()..outputStateStream.listen(listener);
 
     return Scaffold(

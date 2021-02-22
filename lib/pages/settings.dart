@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:photo_gallery/pages/image_sort_order.dart';
 import 'package:settings_ui/settings_ui.dart';
 import 'package:photo_gallery/pages/album_sort_order.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -24,12 +25,12 @@ class _SettingsState extends State<Settings> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     albumSortOrder = prefs.getString('albumSortOrder');
     if (albumSortOrder?.isEmpty ?? true) {
-      albumSortOrder = 'Album name ascending';
+      albumSortOrder = AlbumSortOrder.ALBUM_NAME_ASC;
       prefs.setString('albumSortOrder', albumSortOrder);
     }
     imageSortOrder = prefs.getString('imageSortOrder');
     if (imageSortOrder?.isEmpty ?? true) {
-      imageSortOrder = 'Image title ascending';
+      imageSortOrder = ImageSortOrder.IMAGE_DATE_DESC;
       prefs.setString('imageSortOrder', imageSortOrder);
     }
     setState(() {});

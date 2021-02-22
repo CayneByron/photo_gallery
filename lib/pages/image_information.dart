@@ -2,11 +2,8 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:photo_view/photo_view.dart';
-import 'package:video_player/video_player.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:settings_ui/settings_ui.dart';
-import 'package:path/path.dart' as path;
 
 class ImageInformation extends StatefulWidget {
   @override
@@ -15,7 +12,6 @@ class ImageInformation extends StatefulWidget {
 
 class _ImageInformationState extends State<ImageInformation> {
   Map data = {};
-  // List<AssetEntity> assetList = [];
   Uint8List image;
   File file;
   AssetEntity entity;
@@ -37,22 +33,6 @@ class _ImageInformationState extends State<ImageInformation> {
     file = data['file'];
     currentAlbum = data['currentAlbum'];
     entity = (entity == null) ? data['entity'] : entity;
-
-    void updateInfo() async {
-      List<AssetPathEntity> tempAlbumList = await PhotoManager.getAssetPathList();
-      for (AssetPathEntity album in tempAlbumList) {
-        if (album.name == entity.relativePath.split("/")[entity.relativePath.split("/").length-2]) {
-          List<AssetEntity> newAssetList = await album.assetList;
-          for (AssetEntity newAsset in newAssetList) {
-            if (newAsset.id == entity.id) {
-              setState(() {
-                entity = newAsset;
-              });
-            }
-          }
-        }
-      }
-    }
 
     return Scaffold(
       appBar: AppBar(
@@ -78,7 +58,6 @@ class _ImageInformationState extends State<ImageInformation> {
                         subtitle: entity.title,
                         leading: Icon(Icons.language),
                         onTap: () async {
-
                         },
                       ),
                       SettingsTile(

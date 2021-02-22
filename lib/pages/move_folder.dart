@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:mdi/mdi.dart';
+
 
 
 class MoveFolder extends StatefulWidget {
@@ -25,6 +27,91 @@ class _MoveFolderState extends State<MoveFolder> {
   @override
   void initState() {
     super.initState();
+  }
+
+  MdiIconData getAlphaIcon(String letter) {
+    switch(letter) {
+      case "A": {  return Mdi.alphaACircleOutline; }
+      break;
+
+      case "B": {  return Mdi.alphaBCircleOutline; }
+      break;
+
+      case "C": {  return Mdi.alphaCCircleOutline; }
+      break;
+
+      case "D": { return Mdi.alphaDCircleOutline; }
+      break;
+
+      case "E": { return Mdi.alphaECircleOutline; }
+      break;
+
+      case "F": { return Mdi.alphaFCircleOutline; }
+      break;
+
+      case "G": { return Mdi.alphaGCircleOutline; }
+      break;
+
+      case "H": { return Mdi.alphaHCircleOutline; }
+      break;
+
+      case "I": { return Mdi.alphaICircleOutline; }
+      break;
+
+      case "J": { return Mdi.alphaJCircleOutline; }
+      break;
+
+      case "K": { return Mdi.alphaKCircleOutline; }
+      break;
+
+      case "L": { return Mdi.alphaLCircleOutline; }
+      break;
+
+      case "M": { return Mdi.alphaMCircleOutline; }
+      break;
+
+      case "N": { return Mdi.alphaNCircleOutline; }
+      break;
+
+      case "O": { return Mdi.alphaOCircleOutline; }
+      break;
+
+      case "P": { return Mdi.alphaPCircleOutline; }
+      break;
+
+      case "Q": { return Mdi.alphaQCircleOutline; }
+      break;
+
+      case "R": { return Mdi.alphaRCircleOutline; }
+      break;
+
+      case "S": { return Mdi.alphaSCircleOutline; }
+      break;
+
+      case "T": { return Mdi.alphaTCircleOutline; }
+      break;
+
+      case "U": { return Mdi.alphaUCircleOutline; }
+      break;
+
+      case "V": { return Mdi.alphaVCircleOutline; }
+      break;
+
+      case "W": { return Mdi.alphaWCircleOutline; }
+      break;
+
+      case "X": { return Mdi.alphaXCircleOutline; }
+      break;
+
+      case "Y": { return Mdi.alphaYCircleOutline; }
+      break;
+
+      case "Z": { return Mdi.alphaZCircleOutline; }
+      break;
+
+      default: { return Mdi.helpCircle; }
+      break;
+    }
   }
 
   @override
@@ -51,6 +138,7 @@ class _MoveFolderState extends State<MoveFolder> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemBuilder: (context, index)  {
+
                 return Padding(
                   padding: const EdgeInsets.symmetric(
                       vertical: 1.0,
@@ -79,7 +167,7 @@ class _MoveFolderState extends State<MoveFolder> {
                         }
                       },
                       title: Text(albumList[index].name),
-                      leading: Icon(Icons.local_shipping),
+                      leading: Icon(getAlphaIcon(albumList[index].name.toUpperCase()[0])),
                     ),
                   ),
                 );

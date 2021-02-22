@@ -50,7 +50,7 @@ class ImagesListWidget extends StatelessWidget {
                             Navigator.pushNamed(context, '/view', arguments: {
                               'assetList': assetList,
                               'image': fullSizedImage,
-                              'selectedIndex': index,
+                              'entity': entity,
                             });
                           } else if (entity.type == AssetType.video) {
                             Navigator.pushNamed(context, '/view_video', arguments: {
@@ -59,6 +59,7 @@ class ImagesListWidget extends StatelessWidget {
                           }
                         },
                         onLongPress: () async {
+                          Uint8List image = await this.assetList[index].thumbData;
                           showMaterialModalBottomSheet(
                             expand: false,
                             context: context,
@@ -66,10 +67,9 @@ class ImagesListWidget extends StatelessWidget {
                             builder: (context) => ModalFit(
                               album: this.album,
                               switchAlbum: this.switchAlbum,
-                              images: this.images,
-                              assetList: this.assetList,
+                              image: image,
+                              asset: this.assetList[index],
                               scaffoldKey: this.scaffoldKey,
-                              index: index,
                             ),
                           );
                         },
@@ -82,7 +82,7 @@ class ImagesListWidget extends StatelessWidget {
                                 decoration: BoxDecoration(
                                   color: Colors.transparent,
                                   border: Border.all(
-                                    color: Colors.grey,
+                                    color: Colors.transparent,
                                     width: 0,
                                   ),
                                   borderRadius: BorderRadius.circular(12),
