@@ -19,6 +19,7 @@ _GalleryState createState() => _GalleryState();
 class _GalleryState extends State<Gallery> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   bool isLoading = false;
+  bool abort = false;
   String title = 'Photo Gallery';
 
   List<AssetPathEntity> albumList = [];
@@ -66,7 +67,8 @@ class _GalleryState extends State<Gallery> {
 
   void switchAlbum(AssetPathEntity album) async {
     if (isLoading) {
-      return;
+      abort = true;
+      // return;
     }
     setState(() {
       isLoading = true;
@@ -98,6 +100,10 @@ class _GalleryState extends State<Gallery> {
     prefs.setString('selectedAlbum', selectedAlbum.name);
     assetList = sortAssetList(assetList, imageSortOrder);
     for (AssetEntity asset in assetList) {
+      if (abort) {
+        abort = false;
+        return;
+      }
       if (asset.type == AssetType.audio || asset.type == AssetType.other) {
         continue;
       }
