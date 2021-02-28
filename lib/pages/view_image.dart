@@ -34,12 +34,8 @@ class _ViewImageState extends State<ViewImage> {
   }
 
   void loadImage() async {
-    print('loadImage()');
     image = await entity.originBytes;
-    print('loaded image');
-    setState(() {
-
-    });
+    setState(() {});
   }
 
   void listener(PhotoViewControllerValue value) {

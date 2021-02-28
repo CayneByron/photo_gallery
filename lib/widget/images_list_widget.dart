@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:photo_gallery/modals/modal_fit.dart';
-
+import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 
 class ImagesListWidget extends StatelessWidget {
   const ImagesListWidget({
@@ -26,6 +26,18 @@ class ImagesListWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ScrollController semicircleController = ScrollController();
+    semicircleController.addListener(() {
+      if (semicircleController.offset >= semicircleController.position.maxScrollExtent &&
+          !semicircleController.position.outOfRange) {
+          print("reach the bottom");
+      }
+      if (semicircleController.offset <= semicircleController.position.minScrollExtent &&
+          !semicircleController.position.outOfRange) {
+          print("reach the top");
+      }
+    });
+
     return Expanded(
       flex: 7,
       child: Column(
@@ -37,9 +49,10 @@ class ImagesListWidget extends StatelessWidget {
               padding: EdgeInsets.all(0),
               child: Card(
                 elevation: 5.0,
-                child: Scrollbar(
-                  isAlwaysShown: false,
+                child: DraggableScrollbar.semicircle(
+                  controller: semicircleController,
                   child: GridView.count(
+                    controller: semicircleController,
                     crossAxisCount: 2,
                     children: List.generate(images.length, (index) {
                       return GestureDetector(
