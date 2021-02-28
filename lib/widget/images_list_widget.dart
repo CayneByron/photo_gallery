@@ -46,10 +46,10 @@ class ImagesListWidget extends StatelessWidget {
                         onTap: () async {
                           AssetEntity entity = assetList[index];
                           if (entity.type == AssetType.image) {
-                            Uint8List fullSizedImage = await entity.originBytes;
+                            Uint8List image = await entity.thumbData;
                             Navigator.pushNamed(context, '/view', arguments: {
                               'assetList': assetList,
-                              'image': fullSizedImage,
+                              'image': image,
                               'entity': entity,
                             });
                           } else if (entity.type == AssetType.video) {

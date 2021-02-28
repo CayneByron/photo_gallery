@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -28,8 +29,18 @@ class _ViewImageState extends State<ViewImage> {
     scaleStateController = PhotoViewScaleStateController();
     SystemChrome.setEnabledSystemUIOverlays([]);
     isShowingUI = false;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) => loadImage());
   }
 
+  void loadImage() async {
+    print('loadImage()');
+    image = await entity.originBytes;
+    print('loaded image');
+    setState(() {
+
+    });
+  }
 
   void listener(PhotoViewControllerValue value) {
     print('LISTENER: $value');
@@ -51,7 +62,7 @@ class _ViewImageState extends State<ViewImage> {
     }
 
     AssetEntity entity = assetList[nextIndex];
-    Uint8List nextImage = await entity.originBytes;
+    Uint8List nextImage = await entity.thumbData;
 
     Navigator.pushReplacementNamed(context, route,
         arguments: {
@@ -67,8 +78,8 @@ class _ViewImageState extends State<ViewImage> {
     data = data.isNotEmpty ? data : ModalRoute.of(context).settings.arguments;
     assetList = data['assetList'];
     assetList = assetList.where((i) => i.type == AssetType.image).toList();
-    image = data['image'];
-    entity = data['entity'];
+    image = (image == null) ? data['image'] : image;
+    entity = (entity == null) ? data['entity'] : entity;
     for (int i = 0; i < assetList.length; i++) {
       if (entity.id == assetList[i].id) {
         selectedIndex = i;
@@ -105,6 +116,7 @@ class _ViewImageState extends State<ViewImage> {
                   nextSlide();
                 },
                 child: PhotoView(
+                  gaplessPlayback: true,
                   imageProvider: MemoryImage(image),
                   scaleStateController: scaleStateController,
                 ),

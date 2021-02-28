@@ -15,10 +15,10 @@ void main() => runApp(MaterialApp(
   onGenerateRoute: (settings) {
     switch (settings.name) {
       case '/view_left':
-        return PageTransition(child: ViewImage(), type: PageTransitionType.leftToRightWithFade, settings: settings,);
+        return PageTransition(child: ViewImage(), type: PageTransitionType.leftToRightWithFade, duration: Duration(milliseconds: 100), settings: settings,);
         break;
       case '/view_right':
-        return PageTransition(child: ViewImage(), type: PageTransitionType.rightToLeftWithFade, settings: settings,);
+        return PageTransition(child: ViewImage(), type: PageTransitionType.rightToLeftWithFade, duration: Duration(milliseconds: 100), settings: settings,);
         break;
       default:
         return null;
