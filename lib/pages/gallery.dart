@@ -20,7 +20,7 @@ class _GalleryState extends State<Gallery> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   bool isLoading = false;
   bool abort = false;
-  String title = 'Photo Gallery';
+  String title = 'Photo Explorer';
 
   List<AssetPathEntity> albumList = [];
   List<AssetEntity> assetList = [];
@@ -90,7 +90,7 @@ class _GalleryState extends State<Gallery> {
       }
     });
 
-    title = album.name;
+    // title = album.name;
     imagesMap.clear();
     assetList.clear();
     assetList = await album.assetList;
@@ -107,7 +107,7 @@ class _GalleryState extends State<Gallery> {
       if (asset.type == AssetType.audio || asset.type == AssetType.other) {
         continue;
       }
-      Uint8List img = await asset.thumbDataWithSize(100, 100);
+      Uint8List img = await asset.thumbData;
       imagesMap[asset.title] = img;
       setState(() {});
     }
@@ -161,14 +161,22 @@ class _GalleryState extends State<Gallery> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text(title),
+        backgroundColor: Colors.white,
+        elevation: 0.0,
+        title: Text(title,
+          style: TextStyle(
+            fontWeight: FontWeight.normal,
+            color: Colors.black,
+            fontSize: 26.0
+          ),
+        ),
         actions: [
           Visibility(
             visible: isLoading,
             child: Padding(
                 padding: EdgeInsets.only(right: 20.0),
                 child: SpinKitFadingCube(
-                  color: Colors.white,
+                  color: Colors.black,
                   size: 20.0,
                 )
             ),
@@ -180,7 +188,8 @@ class _GalleryState extends State<Gallery> {
                   Navigator.pushNamed(context, '/settings').then((value) => applySettings());
                 },
                 child: Icon(
-                    Icons.settings
+                  Icons.settings,
+                  color: Colors.black,
                 ),
               )
           ),
@@ -188,6 +197,7 @@ class _GalleryState extends State<Gallery> {
       ),
       body: SafeArea(
         child: Container(
+          color: Colors.red,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,

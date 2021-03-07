@@ -45,7 +45,7 @@ class ImagesListWidget extends StatelessWidget {
         children: <Widget>[
           Expanded(
             child: Container(
-              color: Theme.of(context).canvasColor,
+              color: Colors.white,//Theme.of(context).canvasColor,
               padding: EdgeInsets.all(0),
               child: Card(
                 elevation: 5.0,
@@ -54,6 +54,7 @@ class ImagesListWidget extends StatelessWidget {
                   child: GridView.count(
                     controller: semicircleController,
                     crossAxisCount: 2,
+                    childAspectRatio: 487 / 700,
                     children: List.generate(images.length, (index) {
                       return GestureDetector(
                         onTap: () async {
@@ -87,10 +88,11 @@ class ImagesListWidget extends StatelessWidget {
                           );
                         },
                         child: Center(
+                          heightFactor: 350,
                           child: Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: EdgeInsets.fromLTRB(4, 0, 4, 0),
                             child: AspectRatio(
-                              aspectRatio: 487 / 451,
+                              aspectRatio: 487 / 700,
                               child: Container(
                                 decoration: BoxDecoration(
                                   color: Colors.transparent,
@@ -98,10 +100,10 @@ class ImagesListWidget extends StatelessWidget {
                                     color: Colors.transparent,
                                     width: 0,
                                   ),
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(4),
                                   child: assetList[index].type == AssetType.image ? Image(
                                       image: MemoryImage(images[assetList[index].title]),
                                       fit: BoxFit.cover,
