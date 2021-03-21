@@ -121,6 +121,7 @@ class _MoveFolderState extends State<MoveFolder> {
     file = data['file'];
     entity = data['entity'];
     albumList = data['albumList'];
+    albumList.sort((a, b) => a.name.toUpperCase().compareTo(b.name.toUpperCase()));
     isMove = data['isMove'];
     title = (isMove ? 'Move File' : 'Copy File');
 
@@ -129,7 +130,6 @@ class _MoveFolderState extends State<MoveFolder> {
       appBar: AppBar(title: Text(title)),
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
-
         child: Column(
           children: [
             ListView.builder(

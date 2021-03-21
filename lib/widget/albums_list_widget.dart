@@ -1,10 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'dart:typed_data';
-
-import 'dart:async';
-import 'package:async/async.dart';
-
 
 class AlbumsListWidget extends StatelessWidget {
   const AlbumsListWidget({
@@ -27,7 +22,7 @@ class AlbumsListWidget extends StatelessWidget {
         children: <Widget>[
           Expanded(
             child: Container(
-              color: Colors.white,//Theme.of(context).canvasColor,
+              color: Colors.white,
               padding: EdgeInsets.all(0),
               child: ListView.separated(
                 separatorBuilder: (context, index) => Divider(
@@ -51,7 +46,7 @@ class AlbumsListWidget extends StatelessWidget {
                       margin: EdgeInsets.all(0),
                       child: Container(
                         child: AspectRatio(
-                          aspectRatio: 487 / 700,
+                          aspectRatio: 88 / 116,
                           child: Stack(
                             children: <Widget>[
                               Container(

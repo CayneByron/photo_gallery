@@ -4,6 +4,8 @@ import 'package:photo_manager/photo_manager.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:esys_flutter_share/esys_flutter_share.dart';
+import 'package:mime/mime.dart';
 
 class ModalFit extends StatelessWidget {
   const ModalFit({
@@ -149,6 +151,19 @@ class ModalFit extends StatelessWidget {
                       Navigator.of(context).pop();
                     }
                 ),
+              ),
+              ListTile(
+                title: Text('Share'),
+                leading: Icon(Icons.share),
+                onTap: () async {
+                  try {
+                    print(lookupMimeType(asset.relativePath + '/' + asset.title));
+                    await Share.file('esys image', 'esys.png', image, lookupMimeType(asset.relativePath + '/' + asset.title));
+                  } catch (e) {
+                    print('error: $e');
+                  }
+                  Navigator.of(context).pop();
+                },
               ),
               ListTile(
                 title: Text('Delete'),

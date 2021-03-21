@@ -24,7 +24,6 @@ class _ImageSortOrderState extends State<ImageSortOrder> {
   void setPreference() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String imageSortOrder = prefs.getString('imageSortOrder');
-    print('GET imageSortOrder: ' + imageSortOrder);
     if (imageSortOrder.isNotEmpty) {
       sortLabel = imageSortOrder;
     } else {
@@ -36,7 +35,18 @@ class _ImageSortOrderState extends State<ImageSortOrder> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Image Sort Order')),
+      appBar: AppBar(
+          backgroundColor: Colors.white,
+          iconTheme: IconThemeData(
+            color: Colors.black, //change your color here
+          ),
+          title: Text('Image Sort Order',
+            style: TextStyle(
+              fontWeight: FontWeight.normal,
+              color: Colors.black,
+            ),
+          )
+      ),
       body: SettingsList(
         sections: [
           SettingsSection(tiles: [
@@ -75,8 +85,6 @@ class _ImageSortOrderState extends State<ImageSortOrder> {
   }
 
   Widget trailingWidget(String label) {
-    print('trailingWidget label: ' + label);
-    print('trailingWidget sortLabel: ' + sortLabel);
     return (sortLabel == label)
         ? Icon(Icons.check, color: Colors.blue)
         : Icon(null);

@@ -36,7 +36,16 @@ class _ImageInformationState extends State<ImageInformation> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Details'),
+        backgroundColor: Colors.white,
+        iconTheme: IconThemeData(
+          color: Colors.black, //change your color here
+        ),
+        title: Text('Details',
+          style: TextStyle(
+            fontWeight: FontWeight.normal,
+            color: Colors.black,
+          ),
+        ),
       ),
       backgroundColor: Colors.white,
       body: SafeArea(

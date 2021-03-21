@@ -31,7 +31,18 @@ class _AlbumSortOrderState extends State<AlbumSortOrder> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Album Sort Order')),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        iconTheme: IconThemeData(
+          color: Colors.black, //change your color here
+        ),
+        title: Text('Album Sort Order',
+          style: TextStyle(
+            fontWeight: FontWeight.normal,
+            color: Colors.black,
+          ),
+        ),
+      ),
       body: SettingsList(
         sections: [
           SettingsSection(tiles: [

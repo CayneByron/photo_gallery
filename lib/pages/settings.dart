@@ -40,7 +40,16 @@ class _SettingsState extends State<Settings> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Settings'),
+        backgroundColor: Colors.white,
+        iconTheme: IconThemeData(
+          color: Colors.black, //change your color here
+        ),
+        title: Text('Settings',
+          style: TextStyle(
+            fontWeight: FontWeight.normal,
+            color: Colors.black,
+          ),
+        ),
       ),
       body: SettingsList(
         // backgroundColor: Colors.orange,

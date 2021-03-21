@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,7 +9,6 @@ import 'package:photo_gallery/Widget/albums_list_widget.dart';
 import 'package:photo_gallery/Widget/images_list_widget.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_gallery/pages/album_sort_order.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:flutter/cupertino.dart';
 
 class Gallery extends StatefulWidget {
@@ -68,7 +68,6 @@ class _GalleryState extends State<Gallery> {
   void switchAlbum(AssetPathEntity album) async {
     if (isLoading) {
       abort = true;
-      // return;
     }
     setState(() {
       isLoading = true;
@@ -90,8 +89,11 @@ class _GalleryState extends State<Gallery> {
       }
     });
 
-    // title = album.name;
     imagesMap.clear();
+    if (abort) {
+      abort = false;
+      return;
+    }
     assetList.clear();
     assetList = await album.assetList;
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -99,6 +101,7 @@ class _GalleryState extends State<Gallery> {
     selectedAlbum = album;
     prefs.setString('selectedAlbum', selectedAlbum.name);
     assetList = sortAssetList(assetList, imageSortOrder);
+
     for (AssetEntity asset in assetList) {
       if (abort) {
         abort = false;
@@ -160,40 +163,46 @@ class _GalleryState extends State<Gallery> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0.0,
-        title: Text(title,
-          style: TextStyle(
-            fontWeight: FontWeight.normal,
-            color: Colors.black,
-            fontSize: 26.0
-          ),
-        ),
-        actions: [
-          Visibility(
-            visible: isLoading,
-            child: Padding(
-                padding: EdgeInsets.only(right: 20.0),
-                child: SpinKitFadingCube(
-                  color: Colors.black,
-                  size: 20.0,
-                )
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(64.0),
+        child: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0.0,
+          title: Padding(
+            padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
+            child: Text(title,
+              style: TextStyle(
+                fontWeight: FontWeight.normal,
+                color: Colors.black,
+                fontSize: 32.0,
+              ),
             ),
           ),
-          Padding(
-              padding: EdgeInsets.only(right: 20.0),
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(context, '/settings').then((value) => applySettings());
-                },
-                child: Icon(
-                  Icons.settings,
-                  color: Colors.black,
-                ),
-              )
-          ),
-        ],
+          actions: [
+            Visibility(
+              visible: isLoading,
+              child: Padding(
+                  padding: EdgeInsets.only(right: 20.0, top: 16),
+                  child: SpinKitFadingCube(
+                    color: Colors.black,
+                    size: 20.0,
+                  )
+              ),
+            ),
+            Padding(
+                padding: EdgeInsets.only(right: 20.0, top: 16),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.pushNamed(context, '/settings').then((value) => applySettings());
+                  },
+                  child: Icon(
+                    Icons.settings,
+                    color: Colors.black,
+                  ),
+                )
+            ),
+          ],
+        ),
       ),
       body: SafeArea(
         child: Container(
