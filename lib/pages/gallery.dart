@@ -155,7 +155,6 @@ class _GalleryState extends State<Gallery> {
       imageSortOrder = ImageSortOrder.IMAGE_DATE_DESC;
     }
     assetList = sortAssetList(assetList, imageSortOrder);
-    print('apply settings');
     setState(() {});
   }
 

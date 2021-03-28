@@ -8,7 +8,7 @@
     <application
         android:name="io.flutter.app.FlutterApplication"
         android:label="Photo Explorer"
-        android:icon="@mipmap/launcher_icon"
+        android:icon="@mipmap/launcher_icon_dark"
         android:usesCleartextTraffic="true">
         <activity
             android:name=".MainActivity"

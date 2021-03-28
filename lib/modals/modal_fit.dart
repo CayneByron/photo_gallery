@@ -112,7 +112,6 @@ class ModalFit extends StatelessWidget {
                     title: Text('Crop'),
                     leading: Icon(Icons.crop),
                     onTap: () async {
-                      print('trying to crop');
                       AssetEntity entity = asset;
                       File imageFile = await entity.file;
                       File croppedFile = await ImageCropper.cropImage(
@@ -157,7 +156,6 @@ class ModalFit extends StatelessWidget {
                 leading: Icon(Icons.share),
                 onTap: () async {
                   try {
-                    print(lookupMimeType(asset.relativePath + '/' + asset.title));
                     await Share.file('esys image', 'esys.png', image, lookupMimeType(asset.relativePath + '/' + asset.title));
                   } catch (e) {
                     print('error: $e');

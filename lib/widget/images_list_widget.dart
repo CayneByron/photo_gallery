@@ -127,11 +127,9 @@ class ImagesListWidget extends StatelessWidget {
     semicircleController.addListener(() {
       if (semicircleController.offset >= semicircleController.position.maxScrollExtent &&
           !semicircleController.position.outOfRange) {
-          print("reach the bottom");
       }
       if (semicircleController.offset <= semicircleController.position.minScrollExtent &&
           !semicircleController.position.outOfRange) {
-          print("reach the top");
       }
     });
 
