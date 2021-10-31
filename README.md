@@ -3,7 +3,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-Photo gallery app for Android. Allows for easy folder based navigation. Features include sorting files and folders, moving and copying files, deleting files, sharing files, cropping images, and more. Supports all major image and video file types. Direct link to the Android APK found here: https://drive.google.com/file/d/1Jdcl0JfCkPPAwdq1Jmazn7WbhBDdMUPn/view?usp=sharing
+Photo gallery app for Android. Allows for easy folder based navigation. Features include sorting files and folders, moving and copying files, deleting files, sharing files, cropping images, and more. Supports all major image and video file types. Direct link to the Android APK found here: https://drive.google.com/file/d/1Jdcl0JfCkPPAwdq1Jmazn7WbhBDdMUPn/view?usp=sharing. Play Store link found here: https://play.google.com/store/apps/details?id=com.thistooshallparse.photo_gallery.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
