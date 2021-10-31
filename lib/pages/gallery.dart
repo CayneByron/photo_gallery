@@ -12,8 +12,8 @@ import 'package:photo_gallery/pages/album_sort_order.dart';
 import 'package:flutter/cupertino.dart';
 
 class Gallery extends StatefulWidget {
-@override
-_GalleryState createState() => _GalleryState();
+  @override
+  _GalleryState createState() => _GalleryState();
 }
 
 class _GalleryState extends State<Gallery> {
